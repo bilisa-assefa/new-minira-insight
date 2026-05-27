@@ -1,0 +1,8 @@
+{
+  "name": "Mineral Insight Ethiopia",
+  "description": "A dashboard for exploring mineral potential in Ethiopia using mapping and analytical rules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
