@@ -1,5 +1,5 @@
 import { 
-    LayoutDashboard, Sparkles, FileText, Bookmark, Map, X
+    LayoutDashboard, Sparkles, FileText, Bookmark, Map, X, ExternalLink
 } from 'lucide-react';
   
 export default function Sidebar({ activeMenu, onMenuSelect, isOpen, setIsOpen }: { activeMenu: string, onMenuSelect: (m: string) => void, isOpen: boolean, setIsOpen: (v: boolean) => void }) {
@@ -88,7 +88,16 @@ export default function Sidebar({ activeMenu, onMenuSelect, isOpen, setIsOpen }:
             </div>
             <p className="text-slate-400 text-xs">Real data. Smarter exploration. Better decisions.</p>
             <div className="mt-3 pt-2.5 border-t border-slate-700/60 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400 font-medium tracking-wide">built by bilisa assefa</span>
+                <a 
+                    href="https://bilisa.vercel.app" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="group inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-yellow-400 transition-colors font-medium tracking-wide cursor-pointer"
+                    title="Visit Bilisa Assefa's portfolio"
+                >
+                    <span>built by bilisa assefa</span>
+                    <ExternalLink size={11} className="text-slate-500 group-hover:text-yellow-400 group-hover:translate-x-0.5 transition-all" />
+                </a>
             </div>
         </div>
       </aside>
