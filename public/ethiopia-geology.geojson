@@ -6,18 +6,69 @@
       "properties": {
         "rock_type": "volcanic",
         "fault_presence": true,
-        "name": "Ethiopian Highlands Volcanics"
+        "name": "Ethiopian Northwestern Plateau Volcanics",
+        "description": "Thick sequence of Oligocene flood basalts, rhyolites and pyroclastics"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [35.0, 14.0],
-            [39.0, 14.5],
-            [40.0, 10.0],
-            [37.0, 8.0],
-            [35.0, 9.0],
-            [35.0, 14.0]
+            [35.5, 13.8],
+            [39.2, 14.2],
+            [39.8, 11.5],
+            [38.5, 9.8],
+            [36.8, 9.5],
+            [35.5, 11.2],
+            [35.5, 13.8]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "volcanic",
+        "fault_presence": true,
+        "name": "Main Ethiopian Rift (MER)",
+        "description": "Active Quaternary volcano-tectonic rift valley with extensive normal fault swarms"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [38.0, 7.0],
+            [38.8, 8.5],
+            [39.5, 9.2],
+            [40.2, 9.8],
+            [39.6, 10.0],
+            [38.7, 9.0],
+            [38.0, 8.0],
+            [37.6, 7.0],
+            [38.0, 7.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "volcanic",
+        "fault_presence": true,
+        "name": "Afar Triple Junction & Danakil Basin",
+        "description": "Axial rift volcanic fissures, active basalt shields (Erta Ale) and potash evaporites"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [39.8, 14.5],
+            [41.5, 14.0],
+            [42.4, 12.5],
+            [42.0, 11.0],
+            [40.8, 9.8],
+            [40.0, 10.8],
+            [39.8, 12.8],
+            [39.8, 14.5]
           ]
         ]
       }
@@ -27,18 +78,20 @@
       "properties": {
         "rock_type": "sedimentary",
         "fault_presence": false,
-        "name": "Ogaden Basin"
+        "name": "Ogaden Sedimentary Basin",
+        "description": "Massive Mesozoic-Cenozoic marine limestone, sandstone and shale containing hydrocarbons"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [41.0, 9.0],
-            [47.0, 8.0],
-            [46.0, 5.0],
-            [41.0, 5.0],
-            [39.0, 7.0],
-            [41.0, 9.0]
+            [41.2, 9.2],
+            [46.8, 8.2],
+            [47.5, 6.5],
+            [45.8, 4.8],
+            [41.8, 4.5],
+            [40.5, 6.2],
+            [41.2, 9.2]
           ]
         ]
       }
@@ -48,40 +101,170 @@
       "properties": {
         "rock_type": "metamorphic",
         "fault_presence": true,
-        "name": "Southern Arabian-Nubian Shield"
+        "name": "Adola Greenstone Belt (Gold & Li-Ta)",
+        "description": "Neoproterozoic metamorphic greenstone belt hosting primary shear gold and Kenticha pegmatites"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [34.0, 9.0],
-            [37.0, 8.0],
-            [39.0, 5.0],
-            [35.0, 4.0],
-            [34.0, 9.0]
+            [38.6, 6.2],
+            [39.3, 6.1],
+            [39.4, 5.2],
+            [38.8, 5.0],
+            [38.5, 5.5],
+            [38.6, 6.2]
           ]
         ]
       }
     },
     {
-       "type": "Feature",
-       "properties": {
-           "rock_type": "volcanic",
-           "fault_presence": false,
-           "name": "Afar Triangle"
-       },
-       "geometry": {
-           "type": "Polygon",
-           "coordinates": [
-               [
-                   [40.0, 14.5],
-                   [42.5, 12.5],
-                   [42.0, 10.0],
-                   [40.0, 10.0],
-                   [40.0, 14.5]
-               ]
-           ]
-       }
+      "type": "Feature",
+      "properties": {
+        "rock_type": "metamorphic",
+        "fault_presence": true,
+        "name": "Western Precambrian Shield (Asosa - Welega)",
+        "description": "Birimian-equivalent metasediments, ultramafic complexes, and granites hosting gold & platinum"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [34.2, 10.8],
+            [35.8, 10.5],
+            [36.2, 8.8],
+            [35.0, 8.5],
+            [34.1, 9.5],
+            [34.2, 10.8]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "metamorphic",
+        "fault_presence": true,
+        "name": "Northern Tigray Shield (VMS Copper-Gold)",
+        "description": "Arabian-Nubian Shield metavolcanics hosting volcanogenic massive sulfide deposits"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [37.5, 14.5],
+            [39.5, 14.5],
+            [39.5, 13.5],
+            [37.8, 13.5],
+            [37.5, 14.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "sedimentary",
+        "fault_presence": false,
+        "name": "Blue Nile (Abay) Sedimentary Basin",
+        "description": "Jurassic Antalo limestone and Adigrat sandstone exposed along the canyon"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [37.2, 10.5],
+            [38.6, 10.4],
+            [38.5, 9.4],
+            [37.0, 9.6],
+            [37.2, 10.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "volcanic",
+        "fault_presence": false,
+        "name": "Southeastern Plateau Volcanics (Bale-Arsi)",
+        "description": "Cenozoic trap basalts forming the high volcanic massifs of Bale and Arsi"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [39.0, 7.8],
+            [40.8, 7.6],
+            [40.5, 6.2],
+            [39.0, 6.4],
+            [39.0, 7.8]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "metamorphic",
+        "fault_presence": true,
+        "name": "Southern Borena Basement Terrane",
+        "description": "High-grade gneisses, amphibolites and shear zones extending towards Kenya"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [37.8, 5.0],
+            [39.8, 5.0],
+            [39.6, 3.5],
+            [38.0, 3.5],
+            [37.8, 5.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "sedimentary",
+        "fault_presence": true,
+        "name": "Omo - Turkana Rift Basin",
+        "description": "Tertiary to Quaternary lacustrine sediments, alluvial gravels and river terraces"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [35.6, 6.5],
+            [37.0, 6.4],
+            [36.8, 4.6],
+            [35.6, 4.6],
+            [35.6, 6.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "rock_type": "sedimentary",
+        "fault_presence": false,
+        "name": "Mekelle Sedimentary Outlier",
+        "description": "Upper Jurassic marine carbonates and shales surrounded by Precambrian basement"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [39.0, 13.8],
+            [39.8, 13.8],
+            [39.8, 13.2],
+            [39.0, 13.2],
+            [39.0, 13.8]
+          ]
+        ]
+      }
     }
   ]
 }

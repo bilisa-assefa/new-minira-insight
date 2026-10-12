@@ -30,12 +30,12 @@ export default function Sidebar({ activeMenu, onMenuSelect, isOpen, setIsOpen }:
           
           {/* Logo */}
         <div className="px-6 mb-8 flex items-center gap-3">
-          <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-yellow-500/20 text-yellow-500">
-             <Map size={20} className="text-current" />
+          <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-amber-600 text-slate-950 font-black text-lg shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+             E
           </div>
           <div>
-            <h1 className="text-white font-bold tracking-tight text-lg leading-tight">Mineral Insight</h1>
-            <p className="text-slate-400 text-xs">Ethiopia</p>
+            <h1 className="text-white font-black tracking-tight text-xl leading-tight">Ethiral</h1>
+            <p className="text-yellow-500/80 text-[11px] font-medium tracking-wider uppercase">Mineral AI</p>
           </div>
         </div>
   
@@ -81,9 +81,15 @@ export default function Sidebar({ activeMenu, onMenuSelect, isOpen, setIsOpen }:
         </div>
 
         {/* AI Callout */}
-        <div className="mx-4 p-4 rounded-xl border border-yellow-500/20 bg-gradient-to-b from-[#1a2133] to-[#101524] mt-auto hidden sm:block">
-            <h4 className="text-yellow-500 text-sm font-semibold mb-1">AI-Powered Insights</h4>
+        <div className="mx-4 p-4 rounded-xl border border-yellow-500/20 bg-gradient-to-b from-[#1a2133] to-[#101524] mt-auto">
+            <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles size={14} className="text-yellow-500 shrink-0" />
+                <h4 className="text-yellow-500 text-sm font-semibold">AI-Powered Insights</h4>
+            </div>
             <p className="text-slate-400 text-xs">Real data. Smarter exploration. Better decisions.</p>
+            <div className="mt-3 pt-2.5 border-t border-slate-700/60 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400 font-medium tracking-wide">built by bilisa assefa</span>
+            </div>
         </div>
       </aside>
       </>

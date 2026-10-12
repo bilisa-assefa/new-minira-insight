@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import MapView from './components/MapView';
 import PredictionPanel from './components/PredictionPanel';
 import StatsCards from './components/StatsCards';
 import { Search, Bell, User, Settings2, Layers, MapPin, X, Target, Diamond, Menu } from 'lucide-react';
 import * as turf from '@turf/turf';
+
+import { ETHIOPIA_MAP_LABELS } from './data/mapLabels';
 
 export default function App() {
   const [geoData, setGeoData] = useState<any>(null);
@@ -13,9 +15,12 @@ export default function App() {
   const [predictionData, setPredictionData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [showGeology, setShowGeology] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const currentRequestIdRef = useRef(0);
   
   const MINERALS = [
     'Auto-Detect', 'Gold', 'Silver', 'Copper', 'Zinc', 
@@ -59,14 +64,21 @@ export default function App() {
       .catch(err => console.error("Failed to load geojson", err));
   }, []);
 
-  const triggerAnalysisForCoords = (lat: number, lng: number) => {
+  const triggerAnalysisForCoords = (
+    lat: number, 
+    lng: number, 
+    overrideTarget?: string, 
+    overrideRadius?: number
+  ) => {
+    const effectiveTarget = overrideTarget !== undefined ? overrideTarget : targetMineral;
+    const effectiveRadius = overrideRadius !== undefined ? overrideRadius : analysisRadius;
     let rockTypes = new Set<string>();
     let faultPresence = false;
     
     if (geoData) {
       const clickPoint = turf.point([lng, lat]);
       // Use buffer to approximate the analysis radius area
-      const searchBuffer = turf.buffer(clickPoint, analysisRadius, { units: 'kilometers' });
+      const searchBuffer = turf.buffer(clickPoint, effectiveRadius, { units: 'kilometers' });
 
       turf.featureEach(geoData, (currentFeature: any) => {
         try {
@@ -112,32 +124,42 @@ export default function App() {
         }
     }
 
-    handleLocationSelect(lat, lng, aggregatedRockType, faultPresence);
+    handleLocationSelect(lat, lng, aggregatedRockType, faultPresence, effectiveTarget, effectiveRadius);
   };
 
-  const handleLocationSelect = async (lat: number, lng: number, rockType: string, faultPresence: boolean) => {
+  const handleLocationSelect = async (
+    lat: number, 
+    lng: number, 
+    rockType: string, 
+    faultPresence: boolean,
+    effectiveTarget: string = targetMineral,
+    effectiveRadius: number = analysisRadius
+  ) => {
     setSelectedLocation({ lat, lng });
     setLoading(true);
     setPredictionData(null);
+    const reqId = ++currentRequestIdRef.current;
 
     // Execute geological analysis via Serverless API
     try {
-      // Basic topography estimation for the API
+      // Deterministic topography and NDVI calculation to prevent blinking/flickering
       const distToDanakil = Math.sqrt(Math.pow(lat - 13, 2) + Math.pow(lng - 40.5, 2));
       const distToHighlands = Math.sqrt(Math.pow(lat - 9, 2) + Math.pow(lng - 38.5, 2));
+      const geoSeed = Math.abs(Math.sin(lat * 12.9898 + lng * 78.233));
+
       let elevationCalc = 1000;
       if (distToDanakil < 2.5) elevationCalc = Math.max(-125, 200 * distToDanakil);
-      else if (distToHighlands < 4) elevationCalc = 2000 + (4 - distToHighlands) * 200 + (Math.random() * 150);
-      else elevationCalc = 500 + lat * 40 + (Math.random() * 200);
+      else if (distToHighlands < 4) elevationCalc = 2000 + (4 - distToHighlands) * 200 + ((geoSeed * 1000) % 150);
+      else elevationCalc = 500 + lat * 40 + ((geoSeed * 1000) % 200);
       
       const elevation = Math.floor(elevationCalc);
-      const ndvi = parseFloat((Math.random() * 0.8).toFixed(2));
+      const ndvi = parseFloat((0.15 + (geoSeed * 0.6)).toFixed(2));
 
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-           lat, lng, rockType, faultPresence, targetMineral, elevation, ndvi, multiple: false
+           lat, lng, rockType, faultPresence, targetMineral: effectiveTarget, elevation, ndvi, radius: effectiveRadius, multiple: false
         })
       });
       
@@ -146,12 +168,31 @@ export default function App() {
       }
       
       const data = await response.json();
-      setPredictionData(data);
+      if (reqId === currentRequestIdRef.current) {
+        setPredictionData(data);
+      }
     } catch (error) {
-      console.error("API Analysis Error:", error);
-      alert("Failed to run AI analysis. Check API Key configuration.");
+      if (reqId === currentRequestIdRef.current) {
+        console.error("API Analysis Error:", error);
+      }
     } finally {
-      setLoading(false);
+      if (reqId === currentRequestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleTargetMineralChange = (newTarget: string) => {
+    setTargetMineral(newTarget);
+    if (selectedLocation) {
+      triggerAnalysisForCoords(selectedLocation.lat, selectedLocation.lng, newTarget, analysisRadius);
+    }
+  };
+
+  const handleRadiusChange = (newRadius: number) => {
+    setAnalysisRadius(newRadius);
+    if (selectedLocation) {
+      triggerAnalysisForCoords(selectedLocation.lat, selectedLocation.lng, targetMineral, newRadius);
     }
   };
 
@@ -166,10 +207,25 @@ export default function App() {
       const lng = parseFloat(coordMatch[3]);
       setMapCenterLocation({ lat, lng });
       triggerAnalysisForCoords(lat, lng);
+      setShowSearchSuggestions(false);
       return;
     }
 
-    // Try text search via Nominatim
+    // Direct match against curated high-density Ethiopian labels
+    const q = searchQuery.toLowerCase().trim();
+    const matched = ETHIOPIA_MAP_LABELS.find(l => 
+      l.name.toLowerCase().includes(q) || 
+      l.id.toLowerCase().includes(q) ||
+      (l.mineralPotential && l.mineralPotential.toLowerCase().includes(q))
+    );
+    if (matched) {
+      setMapCenterLocation({ lat: matched.lat, lng: matched.lng });
+      triggerAnalysisForCoords(matched.lat, matched.lng);
+      setShowSearchSuggestions(false);
+      return;
+    }
+
+    // Fallback: Try text search via Nominatim
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=et`);
       const data = await res.json();
@@ -178,6 +234,7 @@ export default function App() {
         const lng = parseFloat(data[0].lon);
         setMapCenterLocation({ lat, lng });
         triggerAnalysisForCoords(lat, lng);
+        setShowSearchSuggestions(false);
       } else {
         alert("Location not found in Ethiopia.");
       }
@@ -217,18 +274,67 @@ export default function App() {
               >
                 <Menu size={24} />
               </button>
-              <form onSubmit={handleSearch} className="relative flex-1 lg:w-[280px] xl:w-[360px] shrink-0">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={16} className="text-slate-500" />
+              <div className="flex items-center gap-2 lg:hidden mr-1">
+                 <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 text-slate-950 font-black text-sm shadow">
+                   E
                  </div>
-                 <input 
-                   type="text" 
-                   value={searchQuery}
-                   onChange={(e) => setSearchQuery(e.target.value)}
-                   placeholder="Search location..." 
-                   className="w-full pl-10 pr-4 py-2 bg-[#171E2F] border border-slate-700/50 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500/50 text-white placeholder-slate-500"
-                 />
-              </form>
+                 <span className="font-bold text-white text-base tracking-tight">Ethiral</span>
+              </div>
+              <div className="relative flex-1 lg:w-[280px] xl:w-[360px] shrink-0">
+                <form onSubmit={handleSearch} className="relative w-full">
+                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search size={16} className="text-slate-500" />
+                   </div>
+                   <input 
+                     type="text" 
+                     value={searchQuery}
+                     onChange={(e) => {
+                       setSearchQuery(e.target.value);
+                       setShowSearchSuggestions(e.target.value.trim().length > 0);
+                     }}
+                     onFocus={() => {
+                       if (searchQuery.trim().length > 0) setShowSearchSuggestions(true);
+                     }}
+                     placeholder="Search 80+ deposits, cities, belts..." 
+                     className="w-full pl-10 pr-4 py-2 bg-[#171E2F] border border-slate-700/50 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500/50 text-white placeholder-slate-500"
+                   />
+                </form>
+
+                {showSearchSuggestions && searchQuery.trim().length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#101524]/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[600] max-h-60 overflow-y-auto">
+                    {ETHIOPIA_MAP_LABELS
+                      .filter(l => 
+                        l.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        l.typeLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (l.mineralPotential && l.mineralPotential.toLowerCase().includes(searchQuery.toLowerCase()))
+                      )
+                      .slice(0, 6)
+                      .map(l => (
+                        <button
+                          key={l.id}
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(l.name);
+                            setShowSearchSuggestions(false);
+                            setMapCenterLocation({ lat: l.lat, lng: l.lng });
+                            triggerAnalysisForCoords(l.lat, l.lng);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-slate-800/80 border-b border-slate-800/50 last:border-0 flex items-center justify-between transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs">
+                              {l.category === 'mineral' ? '⛏️' : l.category === 'geology' ? '⛰️' : l.category === 'river' ? '🌊' : '📍'}
+                            </span>
+                            <span className="text-xs font-semibold text-white">{l.name}</span>
+                          </div>
+                          <span className="text-[10px] text-yellow-400 font-medium px-1.5 py-0.5 rounded bg-yellow-500/10">
+                            {l.typeLabel}
+                          </span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
            </div>
            
            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-hide shrink-0">
@@ -236,7 +342,7 @@ export default function App() {
                  <label className="text-xs text-slate-400 font-medium whitespace-nowrap hidden sm:block">Target:</label>
                  <select 
                    value={targetMineral}
-                   onChange={(e) => setTargetMineral(e.target.value)}
+                   onChange={(e) => handleTargetMineralChange(e.target.value)}
                    className="bg-transparent text-sm font-semibold text-white focus:outline-none appearance-none cursor-pointer p-0"
                  >
                    {MINERALS.map(m => (
@@ -251,7 +357,7 @@ export default function App() {
                    min="1" 
                    max="10" 
                    value={analysisRadius} 
-                   onChange={(e) => setAnalysisRadius(Number(e.target.value))} 
+                   onChange={(e) => handleRadiusChange(Number(e.target.value))} 
                    className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
                  />
                  <div className="flex items-center justify-center bg-yellow-500/10 border border-yellow-500/30 rounded px-2 py-0.5 min-w-[45px] my-1.5">
@@ -502,7 +608,7 @@ export default function App() {
               <button 
                  onClick={() => setShowLabels(!showLabels)}
                  className={`px-4 py-1.5 text-xs font-medium rounded-lg flex items-center gap-2 transition ${showLabels ? 'bg-slate-800 text-yellow-500' : 'text-slate-400 hover:text-white'}`}>
-                 <MapPin size={14} /> Labels
+                 <MapPin size={14} /> Labels {showLabels ? '(80+ Active)' : '(Off)'}
               </button>
            </div>
         </div>
